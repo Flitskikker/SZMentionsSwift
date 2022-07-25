@@ -252,7 +252,14 @@ extension MentionListener /* Private */ {
         let stringToSelectedIndex = String(mentionsTextView.text[startIndex ..< endIndex])
 
         var textBeforeTrigger = " "
-        let searchResult = stringToSelectedIndex.range(of: triggers, options: .backwards)
+        var searchResult = stringToSelectedIndex.range(of: triggers, options: .backwards)
+        
+        // If the trigger is inside an existing mention, ignore the search result
+        if searchResult.range.location != NSNotFound {
+            if self.mentions.contains(where: { $0.range.contains(searchResult.range.location) }) {
+                searchResult = (NSRange(location: NSNotFound, length: 0), "")
+            }
+        }
 
         let location = searchResult.range.location
         let trigger = searchResult.foundString
